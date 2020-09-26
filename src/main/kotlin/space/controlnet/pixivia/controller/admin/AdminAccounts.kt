@@ -2,7 +2,6 @@ package space.controlnet.pixivia.controller.admin
 
 import net.mamoe.mirai.contact.User
 import space.controlnet.pixivia.utils.readJson
-import java.io.File
 import java.nio.file.Paths
 
 object AdminAccounts {

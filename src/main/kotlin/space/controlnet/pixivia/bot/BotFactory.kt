@@ -23,5 +23,7 @@ object BotFactory {
         return Pair(qq, Bot(qq, pw, deviceConfig))
     }
 
-    fun createAll(): List<Pair<Long, Bot>> = accountConfigs.map(::create)
+    fun createAll(): List<Pair<Long, Bot>> {
+        return accountConfigs.map(::create)
+    }
 }
