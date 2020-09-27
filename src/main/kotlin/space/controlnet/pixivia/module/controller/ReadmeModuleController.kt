@@ -8,7 +8,7 @@ class ReadmeModuleController(override val bot: Bot) : ModuleController {
 
     override fun run() {
         bot.subscribeMessages {
-            case("Pixivia 使用说明", onEvent = runReadmeModule)
+            matching(Regex("Pixivia *使用说明", option = RegexOption.IGNORE_CASE), onEvent = runReadmeModule)
         }
     }
 }

@@ -4,7 +4,7 @@ import net.mamoe.mirai.message.MessageEvent
 import space.controlnet.pixivia.user.BlackList
 import space.controlnet.pixivia.utils.replyWithAt
 
-val runReadmeModule: suspend MessageEvent.(String) -> Unit = {
+val runReadmeModule: suspend MessageEvent.(MatchResult) -> Unit = {
     if (!BlackList.contains(sender)) {
         replyWithAt(ReadmeLoader.getText())
     } else {
