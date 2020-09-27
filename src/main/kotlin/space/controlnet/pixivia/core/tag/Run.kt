@@ -33,7 +33,7 @@ val runTagModuleForPrediction: suspend MessageEvent.(String) -> Unit = {
 
         replyWithAt(res)
     } else {
-        reply("Permission denied")
+        replyWithAt("Permission denied")
     }
 }
 
@@ -68,6 +68,6 @@ val runTagModuleForSelfLocalizationSubmission: suspend MessageEvent.(MatchResult
                 }
             }
     } else {
-        reply("Permission denied")
+        replyWithAt("Permission denied")
     }
 }
