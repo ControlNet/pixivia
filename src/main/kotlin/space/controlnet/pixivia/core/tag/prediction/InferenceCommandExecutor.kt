@@ -4,7 +4,7 @@ import java.io.File
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
-object CommandExecutor {
+object InferenceCommandExecutor {
 // From https://stackoverflow.com/questions/35421699/how-to-invoke-external-command-from-within-kotlin-code
 
     /** Run a system-level command.

@@ -1,8 +1,10 @@
 package space.controlnet.pixivia.io.poster
 
+import space.controlnet.pixivia.io.FileHandler
 import java.io.File
 
-abstract class Poster<T>(val data: T) {
-    abstract val file: File
-    abstract fun post(): Unit
+interface Poster<T>: FileHandler {
+    val data: T
+    override val file: File
+    fun post(): Unit
 }

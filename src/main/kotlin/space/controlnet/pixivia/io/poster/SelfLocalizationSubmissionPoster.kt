@@ -1,26 +1,27 @@
 package space.controlnet.pixivia.io.poster
 
 import space.controlnet.pixivia.core.tag.localization.SelfLocalizationSubmissionData
+import space.controlnet.pixivia.utils.append
 import space.controlnet.pixivia.utils.checkOrCreateDir
 import java.io.File
+import java.nio.file.Path
 import java.nio.file.Paths
 
-class SelfLocalizationSubmissionPoster(
-    data: SelfLocalizationSubmissionData
-): Poster<SelfLocalizationSubmissionData>(data) {
+class SelfLocalizationSubmissionPoster(override val data: SelfLocalizationSubmissionData): Poster<SelfLocalizationSubmissionData> {
 
-    override val file: File = Paths.get("submission", "${data.language}.csv").toFile()
+    companion object {
+        val directoryPath: Path = Paths.get("submission").toAbsolutePath().apply(Path::checkOrCreateDir)
+    }
 
-    override fun post() {
-        // check directory
-        Paths.get("submission").checkOrCreateDir()
-
-        // if first time, create a blank csv file
-        if (!file.exists()) {
-            file.createNewFile()
-            file.appendText("original,target\n")
+    override val file: File = directoryPath.append("${data.language}.csv").toFile().apply {
+        // check if the file is existed
+        if (!exists()) {
+            createNewFile()
+            appendText("original,target\n")
         }
+    }
 
+    override fun post(): Unit {
         file.appendText("${data.original},${data.target}\n")
     }
 

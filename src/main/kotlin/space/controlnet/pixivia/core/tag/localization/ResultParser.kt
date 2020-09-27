@@ -1,5 +1,6 @@
 package space.controlnet.pixivia.core.tag.localization
 
+import space.controlnet.pixivia.resources.LocalizationTable
 import space.controlnet.pixivia.utils.toTriple
 
 object ResultParser {
@@ -8,25 +9,25 @@ object ResultParser {
     private fun parseComponentsFromRow(row: String): Triple<String, String, String> =
         Regex("(\\(.*\\)) (.+)").find(row)?.groupValues?.toTriple()!!
 
-    private fun translateEachRow(row: String): String {
-        if (row in listOf("", " ")) return ""
-        val (text, prob, tag) = parseComponentsFromRow(row)
+    private fun translateEachRow(row: String): String? {
+        if (row.isBlank()) return null
+        val (_, prob, tag) = parseComponentsFromRow(row)
         return "$prob ${translator.translate(tag)}"
-    }
-
-    fun parse(result: String?): String {
-        val lines = result!!.lines()
-        return lines.subList(fromIndex = 1, toIndex = lines.size).joinToString(transform = ::translateEachRow)
     }
 
     fun getLanguage(): String = translator.language
 
-    fun getOriginalTabs(): List<String?> = translator.originalTabs
+    val getOriginalTabs: () -> List<String> = LocalizationTable::getOriginalTabs
 
     fun resetLanguage(language: String): ResultParser {
         translator.language = language
         return this
     }
 
-    fun reload() = translator.reload()
+    internal fun reload() = LocalizationTable.reload()
+
+    fun parse(result: String?): String {
+        val lines = result!!.lines()
+        return lines.drop(1).mapNotNull(::translateEachRow).joinToString()
+    }
 }

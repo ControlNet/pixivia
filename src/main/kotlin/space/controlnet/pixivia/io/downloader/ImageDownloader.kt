@@ -2,33 +2,17 @@ package space.controlnet.pixivia.io.downloader
 
 import io.ktor.client.*
 import io.ktor.client.request.*
-import kotlinx.coroutines.runBlocking
-import space.controlnet.pixivia.utils.append
-import space.controlnet.pixivia.utils.checkOrCreateDir
-import java.nio.file.Files
-import java.nio.file.Path
+import space.controlnet.pixivia.utils.with
+import java.io.File
+import java.net.URL
 
-class ImageDownloader(val directoryPath: Path): Downloader {
+class ImageDownloader(override val url: URL, override val file: File) : Downloader {
 
-    override fun get(url: String, fileName: String): Path {
+    override suspend fun get(): Unit = HttpClient().with {
         // try to download the image
         println("Downloading: $url")
-        val image = runBlocking {
-            val client = HttpClient()
-            val res: ByteArray = client.get(url)
-            client.close()
-            res
-        }
-
-        // check if the directory path is existed
-        directoryPath.checkOrCreateDir()
-
-        // save file
-        val imagePath = directoryPath.append("$fileName.jpg")
-        val file = imagePath.toFile()
-        file.createNewFile()
-        file.writeBytes(image)
-        return imagePath
+        val image: ByteArray = this.get(url)
+        file.apply(File::createNewFile).writeBytes(image)
     }
 
 }

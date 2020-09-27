@@ -1,4 +1,4 @@
-package space.controlnet.pixivia.controller
+package space.controlnet.pixivia.module.controller
 
 import net.mamoe.mirai.Bot
 import net.mamoe.mirai.event.subscribeFriendMessages
@@ -7,7 +7,8 @@ import space.controlnet.pixivia.core.tag.runTagModuleForPrediction
 import space.controlnet.pixivia.core.tag.runTagModuleForLocalizationReset
 import space.controlnet.pixivia.core.tag.runTagModuleForSelfLocalizationSubmission
 
-class TagModuleController(bot: Bot) : ModuleController(bot) {
+class TagModuleController(override val bot: Bot) : ModuleController {
+
     override fun run() {
         bot.subscribeMessages {
             contains("这是什么色图", onEvent = runTagModuleForPrediction)

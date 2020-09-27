@@ -3,27 +3,32 @@ package space.controlnet.pixivia.bot
 import net.mamoe.mirai.Bot
 import net.mamoe.mirai.utils.BotConfiguration
 import space.controlnet.pixivia.resources.BotAccountConfig
-import space.controlnet.pixivia.utils.readJson
-import space.controlnet.pixivia.utils.toBotConfiguration
-import java.nio.file.Paths
 
 object BotFactory {
-    private val accountConfigs: List<BotAccountConfig> = Paths
-        .get("src", "main", "resources", "config", "bot.json")
-        .toFile()
-        .readJson()
 
-    private val deviceConfig: BotConfiguration = Paths
-        .get("src", "main", "resources", "config", "device.json")
-        .toString()
-        .toBotConfiguration()
-
-    fun create(accountConfig: BotAccountConfig): Pair<Long, Bot> {
+    internal val create: (BotAccountConfig, BotConfiguration) -> Bot = { accountConfig, deviceConfig ->
         val (qq, pw) = accountConfig
-        return Pair(qq, Bot(qq, pw, deviceConfig))
+        Bot(qq, pw, deviceConfig)
     }
 
-    fun createAll(): List<Pair<Long, Bot>> {
-        return accountConfigs.map(::create)
+    private val withAccountConfig: (BotAccountConfig) -> (BotConfiguration) -> Bot = { accountConfig: BotAccountConfig ->
+        { deviceConfig: BotConfiguration ->
+            create(accountConfig, deviceConfig)
+        }
+    }
+
+    internal val createAll: () -> List<Bot> = {
+        val deviceConfig: BotConfiguration = BotContext.readDeviceConfig()
+        BotContext.readAccountConfigs()
+            .map(withAccountConfig)
+            .map { it(deviceConfig) }
+    }
+
+    internal val createByQQ: (Long) -> Bot = {qq ->
+        val deviceConfig: BotConfiguration = BotContext.readDeviceConfig()
+        BotContext.readAccountConfigs()
+            .first { it.qq == qq }
+            .let { withAccountConfig(it) }
+            .let { it(deviceConfig) }
     }
 }
