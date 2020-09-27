@@ -13,5 +13,3 @@ suspend fun MessageEvent.replyWithAt(text: String) = when (this) {
     is FriendMessageEvent, is TempMessageEvent -> reply(text)
     else -> throw Exception("Unexpected message type")
 }
-
-fun MessageEvent.checkBlacklist(): Boolean = BlackList.contains(sender)

@@ -24,8 +24,6 @@ object ResultParser {
         return this
     }
 
-    internal fun reload() = LocalizationTable.reload()
-
     fun parse(result: String?): String {
         val lines = result!!.lines()
         return lines.drop(1).mapNotNull(::translateEachRow).joinToString()

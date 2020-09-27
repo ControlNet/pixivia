@@ -3,8 +3,8 @@ package space.controlnet.pixivia.module.controller
 import net.mamoe.mirai.Bot
 import net.mamoe.mirai.event.subscribeFriendMessages
 import net.mamoe.mirai.event.subscribeMessages
+import space.controlnet.pixivia.core.tag.runTagModuleForLocalizationMerging
 import space.controlnet.pixivia.core.tag.runTagModuleForPrediction
-import space.controlnet.pixivia.core.tag.runTagModuleForLocalizationReset
 import space.controlnet.pixivia.core.tag.runTagModuleForSelfLocalizationSubmission
 
 class TagModuleController(override val bot: Bot) : ModuleController {
@@ -17,7 +17,7 @@ class TagModuleController(override val bot: Bot) : ModuleController {
         }
 
         bot.subscribeFriendMessages {
-            case("System call: reload l10n", onEvent = runTagModuleForLocalizationReset)
+            case("System call: merge translation", onEvent = runTagModuleForLocalizationMerging)
         }
     }
 
