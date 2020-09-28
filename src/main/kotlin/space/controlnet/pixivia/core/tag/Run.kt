@@ -1,18 +1,15 @@
 package space.controlnet.pixivia.core.tag
 
-import net.mamoe.mirai.message.FriendMessageEvent
 import net.mamoe.mirai.message.MessageEvent
 import net.mamoe.mirai.message.data.Image
 import space.controlnet.pixivia.core.tag.localization.LocalizationMerger
-import space.controlnet.pixivia.user.Administrators
 import space.controlnet.pixivia.core.tag.localization.ResultParser
 import space.controlnet.pixivia.core.tag.localization.SelfLocalizationSubmitterHandler
 import space.controlnet.pixivia.core.tag.prediction.InferenceCommandGenerator
-import space.controlnet.pixivia.user.BlackList
 import space.controlnet.pixivia.utils.*
 
-val runTagModuleForPrediction: suspend MessageEvent.(String) -> Unit = {
-    if (!BlackList.contains(sender)) {
+val runTagModuleForPrediction: suspend MessageEvent.(String) -> Unit = {it ->
+    checkBlackList(it) {
         // filter first image
         val res = message.filterIsInstance<Image>().first().handled()
             // collect url and download the image file
@@ -32,25 +29,26 @@ val runTagModuleForPrediction: suspend MessageEvent.(String) -> Unit = {
             ?.parseResult() ?: "找不到匹配的tag喵"
 
         replyWithAt(res)
-    } else {
-        replyWithAt("Permission denied")
     }
 }
 
-
-val runTagModuleForLocalizationMerging: suspend FriendMessageEvent.(String) -> Unit = {
-    // check if the sender is in admin list
-    if (Administrators.contains(sender)) {
+val runTagModuleForLocalizationMerging: suspend MessageEvent.(String) -> Unit = { it ->
+    checkAdmin(it) {
         // reload localization file
-        LocalizationMerger(ResultParser.getLanguage()).withMerged().save()
-        reply("Localization merged")
-    } else {
-        reply("Permission denied")
+        LocalizationMerger(ResultParser.getLanguage())
+            .let {
+                if (it.hasIncrementalTable()) {
+                    it.withMerged().save()
+                    replyWithAt("Localization merged")
+                } else {
+                    replyWithAt("No incremental change")
+                }
+            }
     }
 }
 
-val runTagModuleForSelfLocalizationSubmission: suspend MessageEvent.(MatchResult) -> Unit = {
-    if (!BlackList.contains(sender)) {
+val runTagModuleForSelfLocalizationSubmission: suspend MessageEvent.(MatchResult) -> Unit = { it ->
+    checkBlackList(it) {
         // extract original tag and target tag for translation
         it.groupValues.toTriple()
             // if original tag is existed or not
@@ -67,7 +65,5 @@ val runTagModuleForSelfLocalizationSubmission: suspend MessageEvent.(MatchResult
                     reply("没有这个tag喵")
                 }
             }
-    } else {
-        replyWithAt("Permission denied")
     }
 }

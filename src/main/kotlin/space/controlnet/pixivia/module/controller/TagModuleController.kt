@@ -14,9 +14,6 @@ class TagModuleController(override val bot: Bot) : ModuleController {
             contains("这是什么色图", onEvent = runTagModuleForPrediction)
             matching(Regex("^ *翻译 *(.+?) *(?:(?:->)|:) *(.+?) *\$"),
                 onEvent = runTagModuleForSelfLocalizationSubmission)
-        }
-
-        bot.subscribeFriendMessages {
             case("System call: merge translation", onEvent = runTagModuleForLocalizationMerging)
         }
     }

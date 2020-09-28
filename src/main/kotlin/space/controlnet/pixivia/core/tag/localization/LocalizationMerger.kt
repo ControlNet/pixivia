@@ -17,6 +17,8 @@ class LocalizationMerger(val language: String) {
             .toAbsolutePath().toFile()
     }
 
+    fun hasIncrementalTable(): Boolean = incrementalTable.file.exists()
+
     private lateinit var merged: List<Map<String, String>>
 
     fun withMerged(): LocalizationMerger {
