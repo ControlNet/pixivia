@@ -1,13 +1,13 @@
 package space.controlnet.pixivia.core.tag.localization
 
 import space.controlnet.pixivia.io.csv.CsvWriter
-import space.controlnet.pixivia.resources.IncrementalLocalizationTable
-import space.controlnet.pixivia.resources.LocalizationTable
+import space.controlnet.pixivia.data.table.IncrementalLocalizationTable
+import space.controlnet.pixivia.data.table.LocalizationTable
 import java.io.File
 import java.nio.file.Paths
 
 class LocalizationMerger(val language: String) {
-    private val oldTable = LocalizationTable
+    private val oldTable = LocalizationTable.instance
     private val incrementalTable = IncrementalLocalizationTable(language)
 
     companion object {
@@ -20,7 +20,7 @@ class LocalizationMerger(val language: String) {
     private lateinit var merged: List<Map<String, String>>
 
     fun withMerged(): LocalizationMerger {
-        val newDataOriginalTags = incrementalTable.getColumnByHeader("original")
+        val newDataOriginalTags = incrementalTable.select.column.byHeader("original")
         val newDataMapping: Map<String, String> = incrementalTable.getMaps()
 
         return oldTable.getData()

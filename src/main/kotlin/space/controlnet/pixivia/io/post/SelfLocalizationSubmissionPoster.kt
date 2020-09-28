@@ -1,4 +1,4 @@
-package space.controlnet.pixivia.io.poster
+package space.controlnet.pixivia.io.post
 
 import space.controlnet.pixivia.core.tag.localization.SelfLocalizationSubmissionData
 import space.controlnet.pixivia.utils.append

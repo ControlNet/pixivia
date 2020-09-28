@@ -1,7 +1,7 @@
 package space.controlnet.pixivia.bot;
 
 import net.mamoe.mirai.utils.BotConfiguration
-import space.controlnet.pixivia.resources.BotAccountConfig
+import space.controlnet.pixivia.data.BotAccountConfig
 import space.controlnet.pixivia.utils.readJson
 import space.controlnet.pixivia.utils.toBotConfiguration
 import java.nio.file.Paths

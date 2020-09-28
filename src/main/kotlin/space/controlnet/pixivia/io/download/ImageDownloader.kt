@@ -1,4 +1,4 @@
-package space.controlnet.pixivia.io.downloader
+package space.controlnet.pixivia.io.download
 
 import io.ktor.client.*
 import io.ktor.client.request.*

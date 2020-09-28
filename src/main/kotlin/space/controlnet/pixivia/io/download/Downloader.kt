@@ -1,4 +1,4 @@
-package space.controlnet.pixivia.io.downloader
+package space.controlnet.pixivia.io.download
 
 import space.controlnet.pixivia.io.FileHandler
 import java.io.File

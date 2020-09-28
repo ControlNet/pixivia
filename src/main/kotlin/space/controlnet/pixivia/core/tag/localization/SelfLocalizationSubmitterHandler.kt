@@ -1,6 +1,6 @@
 package space.controlnet.pixivia.core.tag.localization
 
-import space.controlnet.pixivia.io.poster.SelfLocalizationSubmissionPoster
+import space.controlnet.pixivia.io.post.SelfLocalizationSubmissionPoster
 
 object SelfLocalizationSubmitterHandler {
     fun submit(original: String, target: String, language: String) {

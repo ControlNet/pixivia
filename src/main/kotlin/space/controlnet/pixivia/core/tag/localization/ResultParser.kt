@@ -1,6 +1,6 @@
 package space.controlnet.pixivia.core.tag.localization
 
-import space.controlnet.pixivia.resources.LocalizationTable
+import space.controlnet.pixivia.data.table.LocalizationTable
 import space.controlnet.pixivia.utils.toTriple
 
 object ResultParser {
@@ -17,7 +17,7 @@ object ResultParser {
 
     fun getLanguage(): String = translator.language
 
-    val getOriginalTabs: () -> List<String> = LocalizationTable::getOriginalTabs
+    val getOriginalTabs: () -> List<String> = LocalizationTable()::getOriginalTabs
 
     fun resetLanguage(language: String): ResultParser {
         translator.language = language

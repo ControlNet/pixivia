@@ -2,7 +2,7 @@ package space.controlnet.pixivia.bot
 
 import net.mamoe.mirai.Bot
 import net.mamoe.mirai.utils.BotConfiguration
-import space.controlnet.pixivia.resources.BotAccountConfig
+import space.controlnet.pixivia.data.BotAccountConfig
 
 object BotFactory {
 
