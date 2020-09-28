@@ -12,8 +12,8 @@ class Application(private val bot: Bot, private val modules: Array<out Module>) 
     fun runApp() {
         runBlocking {
             bot.alsoLogin()
-            for (module in modules) {
-                module.withBot(bot).run()
+            modules.forEach {
+                it.withBot(bot).run()
             }
             bot.join()
         }

@@ -9,9 +9,9 @@ class BotWarehouse: Warehouse<Bot>() {
     }
 
     // create all bots in the beginning
-    override val select: Select = Select()
-    override val drop: Drop = Drop()
-    override val create: Create = Create()
+    override val select: Selector = Selector()
+    override val drop: Dropper = Dropper()
+    override val create: Creator = Creator()
 
     init {
         create.all()
@@ -19,11 +19,11 @@ class BotWarehouse: Warehouse<Bot>() {
 
     fun getQQList(): List<Long> = objs.map { it.id }
 
-    open inner class Select: Warehouse<Bot>.Select() {
+    open inner class Selector: Warehouse<Bot>.Selector() {
         fun byQQ(qq: Long): Bot = objs.single { it.id == qq }
     }
 
-    open inner class Drop: Warehouse<Bot>.Drop() {
+    open inner class Dropper: Warehouse<Bot>.Dropper() {
         override fun byElement(element: Bot): BotWarehouse {
             element.close()
             objs.remove(element)
@@ -39,7 +39,7 @@ class BotWarehouse: Warehouse<Bot>() {
         }
     }
 
-    open inner class Create: Warehouse<Bot>.Create() {
+    open inner class Creator: Warehouse<Bot>.Creator() {
         fun all(): BotWarehouse {
             // only works if there is no active bots
             require(objs.isEmpty())
