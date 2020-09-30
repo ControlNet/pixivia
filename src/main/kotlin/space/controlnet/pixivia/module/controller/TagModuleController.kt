@@ -1,7 +1,6 @@
 package space.controlnet.pixivia.module.controller
 
 import net.mamoe.mirai.Bot
-import net.mamoe.mirai.event.subscribeFriendMessages
 import net.mamoe.mirai.event.subscribeMessages
 import space.controlnet.pixivia.core.tag.runTagModuleForLocalizationMerging
 import space.controlnet.pixivia.core.tag.runTagModuleForPrediction

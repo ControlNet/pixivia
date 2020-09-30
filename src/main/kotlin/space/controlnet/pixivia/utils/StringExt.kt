@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import net.mamoe.mirai.utils.BotConfiguration
 import space.controlnet.pixivia.core.tag.localization.ResultParser
+import space.controlnet.pixivia.core.tag.prediction.InferenceCommandExecutor
 import java.io.File
 import java.net.URL
 
@@ -17,7 +18,7 @@ fun String.asFile(): File = File(this)
 
 fun String.asURL(): URL = URL(this)
 
-fun String.executeInConsole(): String? = CommandExecutor.exec(this)
+fun String.executeInConsole(): String? = InferenceCommandExecutor.exec(this)
 
 fun String.parseResult() = ResultParser.parse(this)
 

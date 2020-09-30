@@ -1,7 +1,6 @@
 package space.controlnet.pixivia.core.pixiv.api
 
 import space.controlnet.pixivia.data.PixivAccount
-import space.controlnet.pixivia.utils.CommandExecutor
 import space.controlnet.pixivia.utils.readJson
 import java.io.File
 import java.nio.file.Path

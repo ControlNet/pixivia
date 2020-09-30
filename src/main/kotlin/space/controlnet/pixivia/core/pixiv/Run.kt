@@ -25,14 +25,16 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 
-// display one specified image
+// display one specified image by pixiv id
 val runPixivModuleForDisplayingImage: suspend MessageEvent.(MatchResult) -> Unit = { it ->
     checkBlackList(it) {
         it.groupValues.toPair()
             .apply {
                 val (_, imageId) = this
+                // try to download the queried image
                 replyWithAt("下载图片中喵: $imageId")
                 val (isDownloaded, imagePath) = PixivpyHttpApi.downloadImage(imageId.toLong())
+                // reply if the image is successfully downloaded
                 if (isDownloaded) {
                     imagePath.toFile().sendAsImage()
                 } else {
@@ -45,7 +47,9 @@ val runPixivModuleForDisplayingImage: suspend MessageEvent.(MatchResult) -> Unit
 // follow command
 val runPixivModuleForFollowingAuthor: suspend MessageEvent.(MatchResult) -> Unit = { it ->
     checkAdmin(it) {
+        // get user pixiv id from regex match result
         val userId = it.groupValues[1].toLong()
+        // try to follow the specified user
         if (PixivpyHttpApi.follow(userId)) {
             replyWithAt("关注${userId}成功喵")
         } else {
@@ -57,7 +61,9 @@ val runPixivModuleForFollowingAuthor: suspend MessageEvent.(MatchResult) -> Unit
 // unfollow command
 val runPixivModuleForUnfollowingAuthor: suspend MessageEvent.(MatchResult) -> Unit = { it ->
     checkAdmin(it) {
+        // get user pixiv id from regex match result
         val userId = it.groupValues[1].toLong()
+        // try to unfollow the specified user
         if (PixivpyHttpApi.unfollow(userId)) {
             replyWithAt("取消关注${userId}成功喵")
         } else {
@@ -87,7 +93,7 @@ fun runPixivModuleForPushingNewImages(bot: Bot): suspend CoroutineScope.() -> Un
         delay(interval * 1000)
         println("Finding new images")
 
-        val newImages: List<Triple<PixivImage, Boolean, Path>> = PixivpyHttpApi.getNewImages()
+        val newImages: List<PixivImage.DownloadedImageEntity> = PixivpyHttpApi.getNewImages()
             // only filter the previous 5 minutes
             .filter {
                 ChronoUnit.SECONDS.between(it.getCreatedTimeZoned(), previous) <= 0
@@ -96,12 +102,12 @@ fun runPixivModuleForPushingNewImages(bot: Bot): suspend CoroutineScope.() -> Un
                 it.withDownloaded()
             }.filter {
                 // only filter the images successfully downloaded
-                it.second
+                it.isDownloaded
             }
 
         previous = LocalDateTime.now().atZone(ZoneId.systemDefault())
 
-        // for each group
+        // for each QQ group in the list
         PixivQQGroupLists.getList()
             .map {
                 it.asQQGroup(bot)
@@ -109,8 +115,8 @@ fun runPixivModuleForPushingNewImages(bot: Bot): suspend CoroutineScope.() -> Un
                 // send each image
                 newImages.forEach {
                     buildMessageChain {
-                        add(it.third.toFile().uploadAsImage(group))
-                        add("新色图更新了喵~\n ${it.first.getPixivUrl()}")
+                        add(it.path.toFile().uploadAsImage(group))
+                        add("新色图更新了喵~\n ${it.image.getPixivUrl()}")
                     }.sendTo(group)
                 }
             }

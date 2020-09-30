@@ -8,6 +8,7 @@ import space.controlnet.pixivia.core.pixiv.api.PixivpyServer
 
 class PixivModuleController(override val bot: Bot) : ModuleController {
     init {
+        // run Pixivpy-based server
         PixivpyServer.run()
     }
 

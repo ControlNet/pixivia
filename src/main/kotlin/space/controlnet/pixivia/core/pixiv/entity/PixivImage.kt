@@ -17,7 +17,7 @@ data class PixivImage(
     val imageUrl: Map<String, String>,
     val width: Int,
     val height: Int,
-    // val stats: Map<>,
+    // val stats: Map<String, Map<String, String>>,
     val publicity: Int,
     val age_limit: String,
     val created_time: String,
@@ -41,9 +41,11 @@ data class PixivImage(
         ZonedDateTime.parse("$it JST", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z"))
     }
 
-    suspend fun withDownloaded(): Triple<PixivImage, Boolean, Path> {
+    data class DownloadedImageEntity(val image: PixivImage, val isDownloaded: Boolean, val path: Path)
+
+    suspend fun withDownloaded(): DownloadedImageEntity {
         val (isDownloaded, path) = PixivpyHttpApi.downloadImage(id)
-        return Triple(this, isDownloaded, path)
+        return DownloadedImageEntity(this, isDownloaded, path)
     }
 
     fun getPixivUrl(): String = "https://www.pixiv.net/artworks/$id"
