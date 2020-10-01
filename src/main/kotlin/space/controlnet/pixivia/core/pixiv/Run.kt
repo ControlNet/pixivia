@@ -5,19 +5,15 @@ import kotlinx.coroutines.channels.broadcast
 import kotlinx.coroutines.delay
 import net.mamoe.mirai.Bot
 import net.mamoe.mirai.contact.Group
-import net.mamoe.mirai.message.MessageEvent
-import net.mamoe.mirai.message.data.Message
-import net.mamoe.mirai.message.data.MessageChainBuilder
-import net.mamoe.mirai.message.data.buildMessageChain
-import net.mamoe.mirai.message.data.sendTo
-import net.mamoe.mirai.message.sendAsImageTo
-import net.mamoe.mirai.message.uploadAsImage
+import net.mamoe.mirai.message.*
+import net.mamoe.mirai.message.data.*
 import net.mamoe.mirai.utils.ExternalImage
 import space.controlnet.pixivia.core.pixiv.api.PixivpyHttpApi
 import space.controlnet.pixivia.core.pixiv.entity.PixivImage
 import space.controlnet.pixivia.core.pixiv.entity.PixivUser
 import space.controlnet.pixivia.data.PixivQQGroupLists
 import space.controlnet.pixivia.utils.*
+import java.lang.Exception
 import java.lang.Thread.sleep
 import java.nio.file.Path
 import java.time.LocalDateTime
@@ -77,7 +73,7 @@ val runPixivModuleForDisplayingFollowing: suspend MessageEvent.(MatchResult) -> 
     checkBlackList(it) {
         val followingUsers: List<PixivUser> = PixivpyHttpApi.displayFollowing()
         val res = followingUsers.joinToString(
-            separator = "\n", prefix = "Pixivia正在关注: \n",
+            separator = "\n", prefix = "Pixivia正在关注(总数${followingUsers.size}): \n",
             transform = PixivUser::displayFollowingInfo
         )
         replyWithAt(res)
@@ -89,14 +85,17 @@ fun runPixivModuleForPushingNewImages(bot: Bot): suspend CoroutineScope.() -> Un
     val interval = 300L
     var previous = LocalDateTime.now().atZone(ZoneId.systemDefault())
     while (true) {
-        // wait for 5 minutes
-        delay(interval * 1000)
         println("Finding new images")
 
         val newImages: List<PixivImage.DownloadedImageEntity> = PixivpyHttpApi.getNewImages()
+            .also {
+                println("Find ${it.size} images")
+            }
             // only filter the previous 5 minutes
             .filter {
                 ChronoUnit.SECONDS.between(it.getCreatedTimeZoned(), previous) <= 0
+            }.also {
+                println("New images: ${it.size}")
             }.map {
                 // download image
                 it.withDownloaded()
@@ -116,8 +115,35 @@ fun runPixivModuleForPushingNewImages(bot: Bot): suspend CoroutineScope.() -> Un
                 newImages.forEach {
                     buildMessageChain {
                         add(it.path.toFile().uploadAsImage(group))
-                        add("新色图更新了喵~\n ${it.image.getPixivUrl()}")
+                        add("\n")
+                        add("新色图更新了喵~\n 作者: ${it.image.user.name}(${it.image.user.id})\n${it.image.getPixivUrl()}")
                     }.sendTo(group)
+                }
+            }
+
+        // wait for 5 minutes
+        delay(interval * 1000)
+    }
+}
+
+val runPixivModuleForRecommendation: suspend MessageEvent.(String) -> Unit = {
+    checkBlackList(it) {
+        PixivpyHttpApi.getRecommendation()
+            .map { pixivImage ->
+                pixivImage.withDownloaded()
+            }.forEach { downloadedEntity ->
+                if (downloadedEntity.isDownloaded) {
+                    buildMessageChain {
+                        add(downloadedEntity.path.toFile().uploadAsImage())
+                        add("\n")
+                        if (this@checkBlackList is GroupMessageEvent) {
+                            add(At(sender))
+                        }
+                        add(
+                            "色图推荐喵~\n 作者: ${downloadedEntity.image.user.name}(${downloadedEntity.image.user.id})\n" +
+                                    downloadedEntity.image.getPixivUrl()
+                        )
+                    }.send()
                 }
             }
     }

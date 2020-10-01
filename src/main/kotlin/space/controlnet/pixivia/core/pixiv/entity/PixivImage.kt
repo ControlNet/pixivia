@@ -12,9 +12,9 @@ data class PixivImage(
     val id: Long,
     val title: String,
     val caption: String,
-    val tags: List<String>,
+    // val tags: List<String>,
     val tools: List<String>,
-    val imageUrl: Map<String, String>,
+    val image_urls: Map<String, String>,
     val width: Int,
     val height: Int,
     // val stats: Map<String, Map<String, String>>,
@@ -30,8 +30,8 @@ data class PixivImage(
     val book_style: String,
     val type: String,
     val metadata: String?,
-    val constantType: String?,
-    val sanityLevel: String
+    val constant_type: String?,
+    val sanity_level: String?
 ) {
     fun getCreatedTimeZoned(): ZonedDateTime = created_time.let {
         ZonedDateTime.parse("$it JST", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z"))

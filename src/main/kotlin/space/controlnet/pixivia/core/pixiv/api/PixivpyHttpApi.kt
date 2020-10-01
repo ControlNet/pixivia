@@ -37,4 +37,8 @@ object PixivpyHttpApi {
     suspend fun getNewImages(): List<PixivImage> = HttpClient().with<String> {
         this.get(PixivpyServer.url + "/following/new")
     }.parseJson()
+
+    suspend fun getRecommendation(n: Int = 1): List<PixivImage> = HttpClient().with<String> {
+        this.get(PixivpyServer.url + "/recommend/image")
+    }.parseJson<List<PixivImage>>().take(n)
 }

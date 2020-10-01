@@ -15,9 +15,13 @@ class PixivModuleController(override val bot: Bot) : ModuleController {
     override fun run() {
         bot.subscribeMessages {
             matching(Regex("^ *看图 *?(\\d+) *\$"), onEvent = runPixivModuleForDisplayingImage)
-            matching(Regex("^ *Pixivia *关注 *?(\\d+) *\$"), onEvent = runPixivModuleForFollowingAuthor)
-            matching(Regex("^ *Pixivia *取消关注 *?(\\d+) *\$"), onEvent = runPixivModuleForUnfollowingAuthor)
-            matching(Regex("^ *Pixivia *关注列表 *\$"), onEvent = runPixivModuleForDisplayingFollowing)
+            matching(Regex("^ *Pixivia *关注 *?(\\d+) *\$", option = RegexOption.IGNORE_CASE),
+                onEvent = runPixivModuleForFollowingAuthor)
+            matching(Regex("^ *Pixivia *取消关注 *?(\\d+) *\$", option = RegexOption.IGNORE_CASE),
+                onEvent = runPixivModuleForUnfollowingAuthor)
+            matching(Regex("^ *Pixivia *关注列表 *\$", option = RegexOption.IGNORE_CASE),
+                onEvent = runPixivModuleForDisplayingFollowing)
+            contains("色图推荐", onEvent = runPixivModuleForRecommendation)
         }
 
         bot.launch(block = runPixivModuleForPushingNewImages(bot))
