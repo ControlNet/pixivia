@@ -86,19 +86,12 @@ fun runPixivModuleForPushingNewImages(bot: Bot): suspend CoroutineScope.() -> Un
     val interval = 300L
     var previous = LocalDateTime.now().atZone(ZoneId.systemDefault())
     while (true) {
-        // wait for 5 minutes
-        delay(interval * 1000)
         println("Finding new images")
 
         val newImages: List<PixivImage.DownloadedImageEntity> = PixivpyHttpApi.getNewImages()
-            .also {
-                println("Found ${it.size} images")
-            }
-            // only filter the images published in previous interval (60 seconds as buffer)
+            // only filter the images published in previous 10 hours as buffer
             .filter {
-                ChronoUnit.SECONDS.between(it.getCreatedTimeZoned(), previous) <= 60
-            }.also {
-                println("New images: ${it.size}")
+                ChronoUnit.SECONDS.between(it.getCreatedTimeZoned(), previous) <= 36000
             }.map {
                 // download image
                 it.withDownloaded()
@@ -107,6 +100,8 @@ fun runPixivModuleForPushingNewImages(bot: Bot): suspend CoroutineScope.() -> Un
                 it.isDownloaded
             }.filter {
                 it.image.id !in ImagesSentList.getList()
+            }.also {
+                println("New images: ${it.size}")
             }
 
         // for each QQ group in the list
@@ -119,7 +114,7 @@ fun runPixivModuleForPushingNewImages(bot: Bot): suspend CoroutineScope.() -> Un
                     buildMessageChain {
                         add(it.path.toFile().uploadAsImage(group))
                         add("\n")
-                        add("新色图更新了喵~\n 作者: ${it.image.user.name}(${it.image.user.id})\n${it.image.getPixivUrl()}")
+                        add("新色图更新了喵~\n作者: ${it.image.user.name}(${it.image.user.id})\n${it.image.getPixivUrl()}")
                     }.sendTo(group)
                 }
             }
@@ -128,13 +123,14 @@ fun runPixivModuleForPushingNewImages(bot: Bot): suspend CoroutineScope.() -> Un
         newImages.map {
             it.image.id
         }.also {
-            val newList = PixivQQGroupLists.getList().toMutableList()
-            newList.addAll(it)
-            PixivQQGroupLists.writeList(newList)
+            ImagesSentList.appendList(it)
         }
 
         // reset timer
         previous = LocalDateTime.now().atZone(ZoneId.systemDefault())
+
+        // wait for 5 minutes
+        delay(interval * 1000)
     }
 }
 

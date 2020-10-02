@@ -11,8 +11,4 @@ object PixivQQGroupLists {
         .toAbsolutePath().toFile()
 
     fun getList(): List<Long> = file.readJson()
-
-    fun writeList(list: List<Long>) {
-        file.writeText(list.toJson()?: "[]")
-    }
 }
