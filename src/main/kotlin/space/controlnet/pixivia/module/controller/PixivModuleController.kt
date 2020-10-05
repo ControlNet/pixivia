@@ -21,7 +21,8 @@ class PixivModuleController(override val bot: Bot) : ModuleController {
                 onEvent = runPixivModuleForUnfollowingAuthor)
             matching(Regex("^ *Pixivia *关注列表 *\$", option = RegexOption.IGNORE_CASE),
                 onEvent = runPixivModuleForDisplayingFollowing)
-            contains("色图推荐", onEvent = runPixivModuleForRecommendation)
+            matching(Regex("^ *Pixivia *色图推荐 *\$", option = RegexOption.IGNORE_CASE),
+                onEvent = runPixivModuleForRecommendation)
         }
 
         bot.launch(block = runPixivModuleForPushingNewImages(bot))

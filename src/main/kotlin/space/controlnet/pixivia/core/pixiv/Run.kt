@@ -48,9 +48,9 @@ val runPixivModuleForFollowingAuthor: suspend MessageEvent.(MatchResult) -> Unit
         val userId = it.groupValues[1].toLong()
         // try to follow the specified user
         if (PixivpyHttpApi.follow(userId)) {
-            replyWithAt("关注${userId}成功喵")
+            replyWithAt("关注成功喵 ${userId}: ${PixivpyHttpApi.getUserInfo(userId).name}")
         } else {
-            replyWithAt("关注${userId}失败喵")
+            replyWithAt("关注失败喵 ${userId}: ${PixivpyHttpApi.getUserInfo(userId).name}")
         }
     }
 }
@@ -86,6 +86,8 @@ fun runPixivModuleForPushingNewImages(bot: Bot): suspend CoroutineScope.() -> Un
     val interval = 300L
     var previous = LocalDateTime.now().atZone(ZoneId.systemDefault())
     while (true) {
+        // wait for 5 minutes
+        delay(interval * 1000)
         println("Finding new images")
 
         val newImages: List<PixivImage.DownloadedImageEntity> = PixivpyHttpApi.getNewImages()
@@ -129,12 +131,10 @@ fun runPixivModuleForPushingNewImages(bot: Bot): suspend CoroutineScope.() -> Un
         // reset timer
         previous = LocalDateTime.now().atZone(ZoneId.systemDefault())
 
-        // wait for 5 minutes
-        delay(interval * 1000)
     }
 }
 
-val runPixivModuleForRecommendation: suspend MessageEvent.(String) -> Unit = {
+val runPixivModuleForRecommendation: suspend MessageEvent.(MatchResult) -> Unit = {
     checkBlackList(it) {
         PixivpyHttpApi.getRecommendation()
             .map { pixivImage ->

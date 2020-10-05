@@ -9,8 +9,8 @@ data class PixivUser(
     val is_friend: Boolean,
     val is_premium: Boolean?,
     val profile_image_urls: Map<String, String>,
-    val stats: String?,
-    val profile: String?
+    // val stats: Map<String, Int>?,
+    // val profile: Map<String, String>?
 ) {
     fun displayFollowingInfo(): String = "$id: $name"
 }

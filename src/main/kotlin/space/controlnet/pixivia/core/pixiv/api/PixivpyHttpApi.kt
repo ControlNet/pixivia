@@ -41,4 +41,8 @@ object PixivpyHttpApi {
     suspend fun getRecommendation(n: Int = 1): List<PixivImage> = HttpClient().with<String> {
         this.get(PixivpyServer.url + "/recommend/image")
     }.parseJson<List<PixivImage>>().take(n)
+
+    suspend fun getUserInfo(userId: Long): PixivUser = HttpClient().with<String> {
+        this.get(PixivpyServer.url + "/query/user/$userId")
+    }.parseJson()
 }

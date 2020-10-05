@@ -1,10 +1,10 @@
-package space.controlnet.pixivia.core.tag.prediction
+package space.controlnet.pixivia.utils
 
 import java.io.File
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
-object InferenceCommandExecutor {
+object CommandExecutor {
 // From https://stackoverflow.com/questions/35421699/how-to-invoke-external-command-from-within-kotlin-code
 
     /** Run a system-level command.
