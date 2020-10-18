@@ -8,11 +8,11 @@ class BotWarehouse: Warehouse<Bot>() {
         val instance = BotWarehouse()
     }
 
-    // create all bots in the beginning
     override val select: Selector = Selector()
     override val drop: Dropper = Dropper()
     override val create: Creator = Creator()
 
+    // create all bots in the beginning
     init {
         create.all()
     }

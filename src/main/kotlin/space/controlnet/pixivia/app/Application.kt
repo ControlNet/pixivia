@@ -32,6 +32,4 @@ class Application(private val bot: Bot, private val modules: Array<out Module>) 
             fun withFirstBot(): Application = withBot(BotWarehouse.instance.select.first())
         }
     }
-
-
 }

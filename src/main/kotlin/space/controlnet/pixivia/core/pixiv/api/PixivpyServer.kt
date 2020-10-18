@@ -1,5 +1,7 @@
 package space.controlnet.pixivia.core.pixiv.api
 
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import space.controlnet.pixivia.data.PixivAccount
 import space.controlnet.pixivia.utils.readJson
 import java.io.File
@@ -31,10 +33,20 @@ object PixivpyServer {
             .toAbsolutePath()
     }
 
-    val url: String = "http://127.0.0.1:5000"
+    const val url: String = "http://127.0.0.1:5000"
+
+    private lateinit var process: Process
 
     fun run() {
-        val command = "$pythonPath ${scriptPath()} ${getPixivAccount().username} ${getPixivAccount().password} ${tokenDir()} ${imageSavingDir()}"
-        Runtime.getRuntime().exec(command)
+        val command = "$pythonPath ${scriptPath()} ${getPixivAccount().username} ${getPixivAccount().password} ${getPixivAccount().id} ${tokenDir()} ${imageSavingDir()}"
+        println(command)
+        process = Runtime.getRuntime().exec(command)
+    }
+
+    fun reboot() {
+        // stop server and restart
+        process.destroy()
+        run()
+        println("Rebooting pixivpy server!")
     }
 }

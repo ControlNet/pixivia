@@ -2,43 +2,35 @@ package space.controlnet.pixivia.core.pixiv.entity
 
 import space.controlnet.pixivia.core.pixiv.api.PixivpyHttpApi
 import java.nio.file.Path
-import java.time.LocalDateTime
-import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
 
 data class PixivImage(
     val id: Long,
     val title: String,
+    val type: String,
+    val image_urls: Map<String, String>,
     val caption: String,
+    val restrict: Int,
+    val user: PixivUser,
     // val tags: List<String>,
     val tools: List<String>,
-    val image_urls: Map<String, String>,
+    val create_date: String,
+    val page_count: Int,
     val width: Int,
     val height: Int,
-    // val stats: Map<String, Map<String, String>>,
-    val publicity: Int,
-    val age_limit: String,
-    val created_time: String,
-    val reuploaded_time: String,
-    val user: PixivUser,
-    val is_manga: Boolean,
-    val is_liked: Boolean,
-    val favorite_id: Int,
-    val page_count: Int,
-    val book_style: String,
-    val type: String,
-    val metadata: String?,
-    val constant_type: String?,
-    val sanity_level: String?
+    val sanity_level: String?,
+    val x_restrict: Int,
+    val series: Any?,
+    val meta_single_page: Map<String, String>?,
+    val meta_pages: List<Map<String, Map<String, String>>>?,
+    val total_view: Long,
+    val total_bookmarks: Long,
+    val is_bookmarked: Boolean
 ) {
-    fun getCreatedTimeZoned(): ZonedDateTime = created_time.let {
-        ZonedDateTime.parse("$it JST", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z"))
-    }
-
-    fun getReuploadedTimeZoned(): ZonedDateTime = reuploaded_time.let {
-        ZonedDateTime.parse("$it JST", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z"))
+    fun getCreatedTimeZoned(): ZonedDateTime = create_date.run {
+        ZonedDateTime.parse("${substring(0, 10)} ${substring(11, 19)} JST",
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z"))
     }
 
     data class DownloadedImageEntity(val image: PixivImage, val isDownloaded: Boolean, val path: Path)

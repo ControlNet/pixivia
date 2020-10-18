@@ -11,11 +11,12 @@ object BotFactory {
         Bot(qq, pw, deviceConfig)
     }
 
-    private val withAccountConfig: (BotAccountConfig) -> (BotConfiguration) -> Bot = { accountConfig: BotAccountConfig ->
-        { deviceConfig: BotConfiguration ->
-            create(accountConfig, deviceConfig)
+    private val withAccountConfig: (BotAccountConfig) -> (BotConfiguration) -> Bot =
+        { accountConfig: BotAccountConfig ->
+            { deviceConfig: BotConfiguration ->
+                create(accountConfig, deviceConfig)
+            }
         }
-    }
 
     internal val createAll: () -> List<Bot> = {
         val deviceConfig: BotConfiguration = BotContext.readDeviceConfig()
@@ -24,7 +25,7 @@ object BotFactory {
             .map { it(deviceConfig) }
     }
 
-    internal val createByQQ: (Long) -> Bot = {qq ->
+    internal val createByQQ: (Long) -> Bot = { qq ->
         val deviceConfig: BotConfiguration = BotContext.readDeviceConfig()
         BotContext.readAccountConfigs()
             .first { it.qq == qq }

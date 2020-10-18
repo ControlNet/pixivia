@@ -9,7 +9,7 @@ import space.controlnet.pixivia.core.pixiv.api.PixivpyServer
 class PixivModuleController(override val bot: Bot) : ModuleController {
     init {
         // run Pixivpy-based server
-        PixivpyServer.run()
+        // PixivpyServer.run()
     }
 
     override fun run() {
@@ -23,9 +23,11 @@ class PixivModuleController(override val bot: Bot) : ModuleController {
                 onEvent = runPixivModuleForDisplayingFollowing)
             matching(Regex("^ *Pixivia *色图推荐 *\$", option = RegexOption.IGNORE_CASE),
                 onEvent = runPixivModuleForRecommendation)
+            case("System call: reboot pixivpy server", onEvent = runPixivModuleForManuallyRebootingServer)
         }
 
         bot.launch(block = runPixivModuleForPushingNewImages(bot))
+        // bot.launch(block = runPixivModuleForAutoRebootingServer)
     }
 
 

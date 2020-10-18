@@ -1,6 +1,7 @@
 package space.controlnet.pixivia.core.pixiv
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.channels.broadcast
 import kotlinx.coroutines.delay
 import net.mamoe.mirai.Bot
@@ -9,6 +10,7 @@ import net.mamoe.mirai.message.*
 import net.mamoe.mirai.message.data.*
 import net.mamoe.mirai.utils.ExternalImage
 import space.controlnet.pixivia.core.pixiv.api.PixivpyHttpApi
+import space.controlnet.pixivia.core.pixiv.api.PixivpyServer
 import space.controlnet.pixivia.core.pixiv.entity.PixivImage
 import space.controlnet.pixivia.core.pixiv.entity.PixivUser
 import space.controlnet.pixivia.data.ImagesSentList
@@ -73,7 +75,9 @@ val runPixivModuleForUnfollowingAuthor: suspend MessageEvent.(MatchResult) -> Un
 val runPixivModuleForDisplayingFollowing: suspend MessageEvent.(MatchResult) -> Unit = { it ->
     checkBlackList(it) {
         val followingUsers: List<PixivUser> = PixivpyHttpApi.displayFollowing()
-        val res = followingUsers.joinToString(
+        val res = followingUsers
+            .sortedBy { it.id.toString() }
+            .joinToString(
             separator = "\n", prefix = "Pixivia正在关注(总数${followingUsers.size}): \n",
             transform = PixivUser::displayFollowingInfo
         )
@@ -83,56 +87,82 @@ val runPixivModuleForDisplayingFollowing: suspend MessageEvent.(MatchResult) -> 
 
 // push new images from following list to all QQ group in list
 fun runPixivModuleForPushingNewImages(bot: Bot): suspend CoroutineScope.() -> Unit = {
-    val interval = 300L
+    val interval = 600L
     var previous = LocalDateTime.now().atZone(ZoneId.systemDefault())
     while (true) {
-        // wait for 5 minutes
-        delay(interval * 1000)
         println("Finding new images")
-
-        val newImages: List<PixivImage.DownloadedImageEntity> = PixivpyHttpApi.getNewImages()
-            // only filter the images published in previous 10 hours as buffer
-            .filter {
-                ChronoUnit.SECONDS.between(it.getCreatedTimeZoned(), previous) <= 36000
-            }.map {
-                // download image
-                it.withDownloaded()
-            }.filter {
-                // only filter the images successfully downloaded
-                it.isDownloaded
-            }.filter {
-                it.image.id !in ImagesSentList.getList()
-            }.also {
-                println("New images: ${it.size}")
-            }
-
-        // for each QQ group in the list
-        PixivQQGroupLists.getList()
-            .map {
-                it.asQQGroup(bot)
-            }.forEach { group: Group ->
-                // send each image
-                newImages.forEach {
-                    buildMessageChain {
-                        add(it.path.toFile().uploadAsImage(group))
-                        add("\n")
-                        add("新色图更新了喵~\n作者: ${it.image.user.name}(${it.image.user.id})\n${it.image.getPixivUrl()}")
-                    }.sendTo(group)
+        try {
+            val newImages: List<PixivImage.DownloadedImageEntity> = PixivpyHttpApi.getNewImages()
+                // only filter the images published in previous 24 hours as buffer
+                .filter {
+                    ChronoUnit.SECONDS.between(it.getCreatedTimeZoned(), previous) <= 24 * 3600
+                }.filter {
+                    it.id !in ImagesSentList.getList()
+                }.map {
+                    // download image
+                    it.withDownloaded()
+                }.filter {
+                    // only filter the images successfully downloaded
+                    it.isDownloaded
+                }.also {
+                    println("New images: ${it.size}")
                 }
+
+            // for each QQ group in the list
+            PixivQQGroupLists.getList()
+                .map {
+                    it.asQQGroup(bot)
+                }.forEach { group: Group ->
+                    // send each image
+                    newImages.forEach {
+                        buildMessageChain {
+                            add(it.path.toFile().uploadAsImage(group))
+                            add("\n")
+                            add("新色图更新了喵~\n作者: ${it.image.user.name}(${it.image.user.id})\n${it.image.getPixivUrl()}")
+                        }.sendTo(group)
+                    }
+                }
+
+            // add to the sent list
+            newImages.map {
+                it.image.id
+            }.also {
+                ImagesSentList.appendList(it)
             }
 
-        // add to the sent list
-        newImages.map {
-            it.image.id
-        }.also {
-            ImagesSentList.appendList(it)
+            // reset timer
+            previous = LocalDateTime.now().atZone(ZoneId.systemDefault())
+
+            // wait for 10 minutes
+            delay(interval * 1000)
+
+        } catch (e: TimeoutCancellationException) {
+            println("Timeout, retrying")
+            // PixivpyServer.reboot()
+            // wait for 30 seconds
+            delay(30 * 1000)
+            continue
         }
-
-        // reset timer
-        previous = LocalDateTime.now().atZone(ZoneId.systemDefault())
-
     }
 }
+
+val runPixivModuleForAutoRebootingServer: suspend CoroutineScope.() -> Unit = {
+    val interval = 21600L // reboot server every 6 hours
+    while (true) {
+        delay(interval * 1000)
+        PixivpyServer.reboot()
+    }
+}
+
+val runPixivModuleForManuallyRebootingServer: suspend MessageEvent.(String) -> Unit = {
+    checkAdmin(it) {
+        PixivpyServer.reboot()
+        // wait for 30 seconds
+        delay(30 * 1000)
+        replyWithAt("Pixivpy server rebooted.")
+    }
+}
+
 
 val runPixivModuleForRecommendation: suspend MessageEvent.(MatchResult) -> Unit = {
     checkBlackList(it) {

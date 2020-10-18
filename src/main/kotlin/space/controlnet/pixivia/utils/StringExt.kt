@@ -9,7 +9,10 @@ import java.net.URL
 
 fun String.toBotConfiguration(): BotConfiguration {
     val conf = BotConfiguration()
-    conf.fileBasedDeviceInfo(this)
+    if (!this.isBlank())
+        conf.fileBasedDeviceInfo(this)
+    else
+        conf.randomDeviceInfo()
     return conf
 }
 
@@ -19,7 +22,7 @@ fun String.asURL(): URL = URL(this)
 
 fun String.executeInConsole(): String? = CommandExecutor.exec(this)
 
-fun String.parseResult() = ResultParser.parse(this)
+fun String.parseResult(n: Int) = ResultParser.parse(this, n)
 
 inline fun <reified T : Any> String.parseJson(): T {
     return Gson().fromJson(this, object : TypeToken<T>(){}.type)

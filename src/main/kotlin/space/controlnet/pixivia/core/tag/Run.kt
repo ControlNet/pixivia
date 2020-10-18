@@ -1,5 +1,6 @@
 package space.controlnet.pixivia.core.tag
 
+import io.ktor.client.features.*
 import net.mamoe.mirai.message.MessageEvent
 import net.mamoe.mirai.message.data.Image
 import space.controlnet.pixivia.core.tag.localization.LocalizationMerger
@@ -7,28 +8,35 @@ import space.controlnet.pixivia.core.tag.localization.ResultParser
 import space.controlnet.pixivia.core.tag.localization.SelfLocalizationSubmitterHandler
 import space.controlnet.pixivia.core.tag.prediction.InferenceCommandGenerator
 import space.controlnet.pixivia.utils.*
+import java.util.NoSuchElementException
 
-val runTagModuleForPrediction: suspend MessageEvent.(String) -> Unit = {it ->
+val runTagModuleForPrediction: suspend MessageEvent.(String) -> Unit = { it ->
     checkBlackList(it) {
         // filter first image
-        val res = message.filterIsInstance<Image>().first().handled()
-            // collect url and download the image file
-            .withDownloaded()
-            .getPath()
-            // reply the processing stage to sender
-            .apply {
-                println("Inference: $this")
-                replyWithAt("图片预测中喵~")
-            }
-            // generate command for tensorflow model
-            .let(::InferenceCommandGenerator)
-            .generateCommand()
-            // execute command, get result of console stdout
-            .executeInConsole()
-            // apply localization
-            ?.parseResult() ?: "找不到匹配的tag喵"
-
-        replyWithAt(res)
+        try {
+            val res = message.filterIsInstance<Image>()
+                .first().handled()
+                // collect url and download the image file
+                .withDownloaded()
+                .getPath()
+                // reply the processing stage to sender
+                .apply {
+                    println("Inference: $this")
+                    replyWithAt("图片预测中喵~")
+                }
+                // generate command for tensorflow model
+                .let(::InferenceCommandGenerator)
+                .generateCommand()
+                // execute command, get result of console stdout
+                .executeInConsole()
+                // apply localization
+                ?.parseResult(n = 10) ?: "找不到匹配的tag喵"
+            replyWithAt(res)
+        } catch (e: NoSuchElementException) {
+            replyWithAt("没有收到色图喵")
+        } catch (e: ClientRequestException) {
+            replyWithAt("下载失败喵")
+        }
     }
 }
 
