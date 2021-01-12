@@ -5,6 +5,13 @@
 /submission
 *.ps1
 
+/src/main/resources/config/*.json
+!/src/main/resources/config/*.default.json
+
+/src/main/resources/config/*.txt
+!/src/main/resources/config/*.default.txt
+
+
 # Created by https://www.toptal.com/developers/gitignore/api/gradle,intellij,kotlin
 # Edit at https://www.toptal.com/developers/gitignore?templates=gradle,intellij,kotlin
 
