@@ -22,4 +22,6 @@ object ImagesSentList {
         }.let {
             writeList(it)
         }
+
+    fun append(imageId: Long) = appendList(listOf(imageId))
 }

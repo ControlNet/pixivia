@@ -13,7 +13,7 @@ class PixivModuleController(override val bot: Bot) : ModuleController {
     }
 
     override fun run() {
-        bot.subscribeMessages {
+        bot.eventChannel.subscribeMessages {
             matching(Regex("^ *看图 *?(\\d+) *\$"), onEvent = runPixivModuleForDisplayingImage)
             matching(Regex("^ *Pixivia *关注 *?(\\d+) *\$", option = RegexOption.IGNORE_CASE),
                 onEvent = runPixivModuleForFollowingAuthor)

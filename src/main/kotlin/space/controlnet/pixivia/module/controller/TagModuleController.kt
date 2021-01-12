@@ -9,7 +9,7 @@ import space.controlnet.pixivia.core.tag.runTagModuleForSelfLocalizationSubmissi
 class TagModuleController(override val bot: Bot) : ModuleController {
 
     override fun run() {
-        bot.subscribeMessages {
+        bot.eventChannel.subscribeMessages {
             contains("这是什么色图", onEvent = runTagModuleForPrediction)
             matching(Regex("^ *翻译 *(.+?) *(?:(?:->)|:) *(.+?) *\$"),
                 onEvent = runTagModuleForSelfLocalizationSubmission)

@@ -2,8 +2,6 @@ package space.controlnet.pixivia.app;
 
 import kotlinx.coroutines.runBlocking
 import net.mamoe.mirai.Bot
-import net.mamoe.mirai.alsoLogin
-import net.mamoe.mirai.join
 import space.controlnet.pixivia.data.warehouse.BotWarehouse
 import space.controlnet.pixivia.module.Module
 
@@ -11,7 +9,7 @@ import space.controlnet.pixivia.module.Module
 class Application(private val bot: Bot, private val modules: Array<out Module>) {
     fun runApp() {
         runBlocking {
-            bot.alsoLogin()
+            bot.login()
             modules.forEach {
                 it.withBot(bot).run()
             }

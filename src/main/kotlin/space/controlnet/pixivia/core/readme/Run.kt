@@ -1,6 +1,6 @@
 package space.controlnet.pixivia.core.readme
 
-import net.mamoe.mirai.message.MessageEvent
+import net.mamoe.mirai.event.events.MessageEvent
 import space.controlnet.pixivia.utils.checkBlackList
 import space.controlnet.pixivia.utils.replyWithAt
 

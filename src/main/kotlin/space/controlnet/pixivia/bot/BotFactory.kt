@@ -1,6 +1,7 @@
 package space.controlnet.pixivia.bot
 
 import net.mamoe.mirai.Bot
+import net.mamoe.mirai.BotFactory as MiraiBotFactory
 import net.mamoe.mirai.utils.BotConfiguration
 import space.controlnet.pixivia.data.BotAccountConfig
 
@@ -8,7 +9,7 @@ object BotFactory {
 
     internal val create: (BotAccountConfig, BotConfiguration) -> Bot = { accountConfig, deviceConfig ->
         val (qq, pw) = accountConfig
-        Bot(qq, pw, deviceConfig)
+        MiraiBotFactory.newBot(qq, pw, deviceConfig)
     }
 
     private val withAccountConfig: (BotAccountConfig) -> (BotConfiguration) -> Bot =

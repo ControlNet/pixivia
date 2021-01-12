@@ -1,7 +1,8 @@
 package space.controlnet.pixivia.core.wtdata
 
 import kotlinx.coroutines.TimeoutCancellationException
-import net.mamoe.mirai.message.MessageEvent
+import net.mamoe.mirai.event.events.MessageEvent
+import net.mamoe.mirai.utils.ExternalResource.Companion.sendAsImageTo
 import space.controlnet.pixivia.core.wtdata.api.WTDataVisualizationInterface
 import space.controlnet.pixivia.exception.ClazzCategoryNotFoundException
 import space.controlnet.pixivia.exception.ValueCategoryNotFoundException
@@ -16,9 +17,9 @@ val runWTDataModuleForPlottingHeatmap: suspend MessageEvent.(MatchResult) -> Uni
             try {
                 val imagePath: Path = WTDataVisualizationInterface.heatmap(clazz, value)
                 try {
-                    imagePath.toFile().sendAsImage()
+                    imagePath.toFile().sendAsImageTo(this.subject)
                 } catch (e: TimeoutCancellationException) {
-                    imagePath.toFile().sendAsImage()
+                    imagePath.toFile().sendAsImageTo(this.subject)
                 }
             } catch (e: ClazzCategoryNotFoundException) {
                 replyWithAt("不知道什么是\"$clazz\"喵")

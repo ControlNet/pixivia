@@ -2,30 +2,28 @@ package space.controlnet.pixivia.core.pixiv
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.channels.broadcast
 import kotlinx.coroutines.delay
 import net.mamoe.mirai.Bot
-import net.mamoe.mirai.contact.Group
-import net.mamoe.mirai.message.*
-import net.mamoe.mirai.message.data.*
-import net.mamoe.mirai.utils.ExternalImage
+import net.mamoe.mirai.event.events.GroupMessageEvent
+import net.mamoe.mirai.event.events.MessageEvent
+import net.mamoe.mirai.message.data.At
+import net.mamoe.mirai.message.data.buildMessageChain
+import net.mamoe.mirai.message.data.sendTo
+import net.mamoe.mirai.utils.ExternalResource.Companion.sendAsImageTo
+import net.mamoe.mirai.utils.ExternalResource.Companion.uploadAsImage
 import space.controlnet.pixivia.core.pixiv.api.PixivpyHttpApi
 import space.controlnet.pixivia.core.pixiv.api.PixivpyServer
-import space.controlnet.pixivia.core.pixiv.entity.PixivImage
 import space.controlnet.pixivia.core.pixiv.entity.PixivUser
 import space.controlnet.pixivia.data.ImagesSentList
 import space.controlnet.pixivia.data.PixivQQGroupLists
 import space.controlnet.pixivia.utils.*
-import java.lang.Exception
-import java.lang.Thread.sleep
-import java.nio.file.Path
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 
 // display one specified image by pixiv id
-val runPixivModuleForDisplayingImage: suspend MessageEvent.(MatchResult) -> Unit = { it ->
+val runPixivModuleForDisplayingImage: suspend MessageEvent.(MatchResult) -> Unit = { it: MatchResult ->
+
     checkBlackList(it) {
         it.groupValues.toPair()
             .apply {
@@ -35,7 +33,7 @@ val runPixivModuleForDisplayingImage: suspend MessageEvent.(MatchResult) -> Unit
                 val (isDownloaded, imagePath) = PixivpyHttpApi.downloadImage(imageId.toLong())
                 // reply if the image is successfully downloaded
                 if (isDownloaded) {
-                    imagePath.toFile().sendAsImage()
+                    imagePath.toFile().sendAsImageTo(this@checkBlackList.subject)
                 } else {
                     replyWithAt("图片下载失败喵")
                 }
@@ -87,12 +85,12 @@ val runPixivModuleForDisplayingFollowing: suspend MessageEvent.(MatchResult) -> 
 
 // push new images from following list to all QQ group in list
 fun runPixivModuleForPushingNewImages(bot: Bot): suspend CoroutineScope.() -> Unit = {
-    val interval = 600L
+    val interval = 1800L
     var previous = LocalDateTime.now().atZone(ZoneId.systemDefault())
     while (true) {
         println("Finding new images")
         try {
-            val newImages: List<PixivImage.DownloadedImageEntity> = PixivpyHttpApi.getNewImages()
+            PixivpyHttpApi.getNewImages()
                 // only filter the images published in previous 24 hours as buffer
                 .filter {
                     ChronoUnit.SECONDS.between(it.getCreatedTimeZoned(), previous) <= 24 * 3600
@@ -107,33 +105,26 @@ fun runPixivModuleForPushingNewImages(bot: Bot): suspend CoroutineScope.() -> Un
                 }.also {
                     println("New images: ${it.size}")
                 }
-
-            // for each QQ group in the list
-            PixivQQGroupLists.getList()
-                .map {
-                    it.asQQGroup(bot)
-                }.forEach { group: Group ->
-                    // send each image
-                    newImages.forEach {
-                        buildMessageChain {
-                            add(it.path.toFile().uploadAsImage(group))
-                            add("\n")
-                            add("新色图更新了喵~\n作者: ${it.image.user.name}(${it.image.user.id})\n${it.image.getPixivUrl()}")
-                        }.sendTo(group)
-                    }
+                // for each new image, send to each QQ group in the list
+                .forEach { newImage ->
+                    PixivQQGroupLists
+                        .getList()
+                        .map{ it.asQQGroup(bot) }
+                        .forEach { group ->
+                            buildMessageChain {
+                                add(newImage.path.toFile().uploadAsImage(group))
+                                add("\n")
+                                add("新色图更新了喵~\n作者: ${newImage.image.user.name}(${newImage.image.user.id})\n${newImage.image.getPixivUrl()}")
+                            }.sendTo(group)
+                        }
+                    // add to the sent list
+                    ImagesSentList.append(newImage.image.id)
                 }
-
-            // add to the sent list
-            newImages.map {
-                it.image.id
-            }.also {
-                ImagesSentList.appendList(it)
-            }
 
             // reset timer
             previous = LocalDateTime.now().atZone(ZoneId.systemDefault())
 
-            // wait for 10 minutes
+            // wait for next interval
             delay(interval * 1000)
 
         } catch (e: TimeoutCancellationException) {
@@ -172,7 +163,7 @@ val runPixivModuleForRecommendation: suspend MessageEvent.(MatchResult) -> Unit 
             }.forEach { downloadedEntity ->
                 if (downloadedEntity.isDownloaded) {
                     buildMessageChain {
-                        add(downloadedEntity.path.toFile().uploadAsImage())
+                        add(downloadedEntity.path.toFile().uploadAsImage(this@checkBlackList.subject))
                         add("\n")
                         if (this@checkBlackList is GroupMessageEvent) {
                             add(At(sender))
@@ -181,7 +172,9 @@ val runPixivModuleForRecommendation: suspend MessageEvent.(MatchResult) -> Unit 
                             "色图推荐喵~\n 作者: ${downloadedEntity.image.user.name}(${downloadedEntity.image.user.id})\n" +
                                     downloadedEntity.image.getPixivUrl()
                         )
-                    }.send()
+                    }.apply {
+                        subject.sendMessage(this)
+                    }
                 }
             }
     }

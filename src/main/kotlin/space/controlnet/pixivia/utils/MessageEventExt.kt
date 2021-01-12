@@ -1,17 +1,17 @@
 package space.controlnet.pixivia.utils
 
-import net.mamoe.mirai.message.FriendMessageEvent
-import net.mamoe.mirai.message.GroupMessageEvent
-import net.mamoe.mirai.message.MessageEvent
-import net.mamoe.mirai.message.TempMessageEvent
+import net.mamoe.mirai.event.events.FriendMessageEvent
+import net.mamoe.mirai.event.events.GroupMessageEvent
+import net.mamoe.mirai.event.events.MessageEvent
+import net.mamoe.mirai.event.events.GroupTempMessageEvent
 import net.mamoe.mirai.message.data.At
 import space.controlnet.pixivia.user.Administrators
 import space.controlnet.pixivia.user.BlackList
 import java.lang.Exception
 
 suspend fun MessageEvent.replyWithAt(plain: String) = when (this) {
-    is GroupMessageEvent -> reply(At(sender) + plain)
-    is FriendMessageEvent, is TempMessageEvent -> reply(plain)
+    is GroupMessageEvent -> subject.sendMessage(At(sender) + plain)
+    is FriendMessageEvent, is GroupTempMessageEvent -> subject.sendMessage(plain)
     else -> throw Exception("Unexpected message type")
 }
 

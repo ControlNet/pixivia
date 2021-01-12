@@ -1,7 +1,7 @@
 package space.controlnet.pixivia.core.tag.image
 
 import net.mamoe.mirai.message.data.Image
-import net.mamoe.mirai.message.data.queryUrl
+import net.mamoe.mirai.message.data.Image.Key.queryUrl
 import space.controlnet.pixivia.io.download.ImageDownloader
 import space.controlnet.pixivia.utils.append
 import space.controlnet.pixivia.utils.asURL

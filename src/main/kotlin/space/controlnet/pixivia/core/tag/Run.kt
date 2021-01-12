@@ -1,7 +1,7 @@
 package space.controlnet.pixivia.core.tag
 
 import io.ktor.client.features.*
-import net.mamoe.mirai.message.MessageEvent
+import net.mamoe.mirai.event.events.MessageEvent
 import net.mamoe.mirai.message.data.Image
 import space.controlnet.pixivia.core.tag.localization.LocalizationMerger
 import space.controlnet.pixivia.core.tag.localization.ResultParser
@@ -67,10 +67,10 @@ val runTagModuleForSelfLocalizationSubmission: suspend MessageEvent.(MatchResult
                         SelfLocalizationSubmitterHandler.withTags(original, target)
                     }.apply {
                         this(ResultParser.getLanguage())
-                        reply("提交成功喵: $second -> $third")
+                        subject.sendMessage("提交成功喵: $second -> $third")
                     }
                 } else {
-                    reply("没有这个tag喵")
+                    subject.sendMessage("没有这个tag喵")
                 }
             }
     }
