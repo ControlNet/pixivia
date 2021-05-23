@@ -93,7 +93,7 @@ fun runPixivModuleForPushingNewImages(bot: Bot): suspend CoroutineScope.() -> Un
             PixivpyHttpApi.getNewImages()
                 // only filter the images published in previous 24 hours as buffer
                 .filter {
-                    ChronoUnit.SECONDS.between(it.getCreatedTimeZoned(), previous) <= 24 * 3600
+                    ChronoUnit.SECONDS.between(it.getCreatedTimeZoned(), previous) <= 12 * 3600
                 }.filter {
                     it.id !in ImagesSentList.getList()
                 }.map {

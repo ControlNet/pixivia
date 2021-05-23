@@ -10,8 +10,10 @@ A personal mirai-based QQ robot for fun.
 
 ## Requirements
 ```groovy
-implementation "org.jetbrains.kotlin:kotlin-stdlib"
-implementation "net.mamoe:mirai-core-qqandroid:1.3.1"
+implementation "org.jetbrains.kotlin:kotlin-stdlib:1.4.21"
+implementation "net.mamoe:mirai-core:2.0-RC"
+implementation "net.mamoe:mirai-core-api:2.0-RC"
+runtimeOnly "net.mamoe:mirai-login-solver-selenium:latest"
 implementation "com.github.doyaaaaaken:kotlin-csv-jvm:0.7.3"
 implementation "com.google.code.gson:gson:2.8.6"
 ```

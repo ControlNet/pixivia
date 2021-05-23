@@ -19,8 +19,8 @@ class Application(private val bot: Bot, private val modules: Array<out Module>) 
 
     object Builder {
         fun registerModules(vararg modules: Module): ApplicationBuilder = ApplicationBuilder { bot: Bot ->
-                Application(bot, modules)
-            }
+            Application(bot, modules)
+        }
 
         class ApplicationBuilder(val buildApp: (Bot) -> Application) {
             fun withBot(bot: Bot): Application = buildApp(bot)
