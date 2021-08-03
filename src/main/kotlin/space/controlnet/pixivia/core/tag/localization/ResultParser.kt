@@ -28,7 +28,7 @@ object ResultParser {
         val lines = result!!.lines()
         return lines.asSequence().drop(1)
             .mapNotNull(::translateEachRow)
-            .sortedBy { it.prob }
+            .sortedByDescending { it.prob }
             .run {
                 if (n <= 0) this else take(n)
             }

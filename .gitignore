@@ -4,6 +4,7 @@
 /temp
 /submission
 *.ps1
+*.cmd
 
 /src/main/resources/config/*.json
 !/src/main/resources/config/*.default.json

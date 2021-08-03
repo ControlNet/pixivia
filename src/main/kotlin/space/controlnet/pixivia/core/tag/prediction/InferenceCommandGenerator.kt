@@ -5,7 +5,8 @@ import java.nio.file.Paths
 
 class InferenceCommandGenerator(private val imagePath: Path) {
     private val pythonPath: () -> Path = {
-        Paths.get("python")
+        Paths.get("C:", "Users", "controlnet", "anaconda3", "envs", "pixivia", "python.exe")
+            .toAbsolutePath()
     }
     private val scriptPath: () -> Path = {
         Paths.get("src", "main", "resources", "deepdanbooru-master", "inference.py")
@@ -13,6 +14,6 @@ class InferenceCommandGenerator(private val imagePath: Path) {
     }
 
     fun generateCommand(): String {
-        return "${pythonPath()} ${scriptPath()} ${imagePath.toAbsolutePath()}"
+        return "${pythonPath()} ${scriptPath()} \"${imagePath.toAbsolutePath()}\""
     }
 }
